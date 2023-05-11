@@ -11,8 +11,12 @@ import { setDestination , setOrigin } from '../slices/navSlice';
 const HomeScreen = () => {
   const dispatch = useDispatch();
 
-  const location = {'lat': 51.509865 , 'lng' : -0.118092};
-  const description = "London is the capital of England and the United Kingdom."
+  const location = {'lat': 18.9220 , 'lng' : 72.8347};
+  const description = "Gateway of India, Mumbai"
+
+  dispatch(setOrigin( { location: location, description: description} ));
+
+  dispatch(setDestination(null));
 
   return (
     <SafeAreaView style={tw`bg-white h-full`} >
@@ -40,13 +44,6 @@ const HomeScreen = () => {
                 textInput:{fontSize:18}
                 }}
               onPress={(data, details = null)=>{
-                console.log(location);
-                dispatch(setOrigin({
-                  location: location,
-                  description: description
-                }));
-
-                dispatch(setDestination(null));
               }}
               placeholder='Where from'
               fetchDetails={true}
@@ -54,7 +51,7 @@ const HomeScreen = () => {
               enablePoweredByContainer={false}
               minLength={2}
               query={{
-                key:'GOOGLE_MAPS_APIKEY',
+                key:GOOGLE_MAPS_APIKEY,
                 language:"en",
               }}
               nearbyPlacesAPI='GooglePlacesSearch'
