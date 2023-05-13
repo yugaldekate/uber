@@ -22,14 +22,16 @@ const MapScreen = () => {
               name="NavigationCard"
               component={NavigateCard}
               options={{
-                hearderShown:false
+                headerShown: false,
+                headerTitle:"",
+                headerShadowVisible: false,
               }}
             />
             <Stack.Screen
               name="RideOptionsCard"
               component={RideOptionsCard}
               options={{
-                hearderShown:false
+                headerShown:false,
               }}
             />
           </Stack.Navigator>
