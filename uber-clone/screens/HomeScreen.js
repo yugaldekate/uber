@@ -12,8 +12,8 @@ import { setDestination , setOrigin } from '../slices/navSlice';
 const HomeScreen = () => {
   const dispatch = useDispatch();
 
-  const location = {'lat': 18.9398 , 'lng' : 72.8354};
-  const description = "Gateway of India, Mumbai"
+  const location = {'lat': 19.0760 , 'lng' : 72.8777};
+  const description = "Mumbai, Maharastra"
 
   dispatch(setOrigin( { location: location, description: description} ));
 
