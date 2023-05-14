@@ -13,8 +13,8 @@ const NavigateCard = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
 
-  const location = {'lat': 18.9322 , 'lng' : 72.8264};
-  const description = "Churchgate, Mumbai"
+  const location = {'lat': 28.7041 , 'lng' : 77.1025};
+  const description = "Delhi"
 
   dispatch(setDestination( { location: location, description: description} ));
 
