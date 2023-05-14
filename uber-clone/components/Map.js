@@ -1,15 +1,16 @@
 import { StyleSheet, Text, View } from 'react-native';
-import React, { useEffect, useRef } from 'react';
-import MapView , {Marker} from 'react-native-maps';
+import React, { useEffect, useRef, useState } from 'react';
+import MapView , {Marker , Polyline} from 'react-native-maps';
 import tw from 'tailwind-react-native-classnames';
 import { useSelector } from 'react-redux';
 import { selectDestination, selectOrigin } from '../slices/navSlice';
-import MapViewDirections from 'react-native-maps-directions';
+import MapViewDirections  from 'react-native-maps-directions';
 import {GOOGLE_MAPS_APIKEY} from '@env';
 import { setTravelTimeInformation } from '../slices/navSlice';
 import { useDispatch } from 'react-redux';
 
 import axios from 'axios';
+
 
 const Map = () => {
 
@@ -23,20 +24,8 @@ const Map = () => {
     const destinationLng = destination?.location.lng;
     const destinationLat = destination?.location.lat;
 
-    const options = {
-        method: 'GET',
-        url: 'https://trueway-matrix.p.rapidapi.com/CalculateDrivingMatrix?&distance_unit=km',
-        params: {
-          origins: `${originLat}, ${originLng};${destinationLat},${destinationLng};`,
-          destinations: `${originLat}, ${originLng};${destinationLat},${destinationLng};`,
-          distance: 'km'
-        },
-        headers: {
-          'X-RapidAPI-Key': '303c62c77fmsh8641af55211efc3p1df84cjsn3585047e62e2',
-          'X-RapidAPI-Host': 'trueway-matrix.p.rapidapi.com'
-        }
-      };
-
+    
+    const [routeCoordinates, setRouteCoordinates] = useState([]);
 
 
     useEffect(()=>{
@@ -51,6 +40,20 @@ const Map = () => {
 
     useEffect(()=>{
         if(!origin || !destination) return;
+
+        const options = {
+            method: 'GET',
+            url: 'https://trueway-matrix.p.rapidapi.com/CalculateDrivingMatrix?&distance_unit=km',
+            params: {
+              origins: `${originLat}, ${originLng};${destinationLat},${destinationLng};`,
+              destinations: `${originLat}, ${originLng};${destinationLat},${destinationLng};`,
+              distance: 'km'
+            },
+            headers: {
+              'X-RapidAPI-Key': '303c62c77fmsh8641af55211efc3p1df84cjsn3585047e62e2',
+              'X-RapidAPI-Host': 'trueway-matrix.p.rapidapi.com'
+            }
+          };
 
         const getTravelTime = async()=> {
 
@@ -76,11 +79,52 @@ const Map = () => {
 
     }, [origin, destination, GOOGLE_MAPS_APIKEY]);
 
+
+    useEffect(()=>{
+
+        if(!origin || !destination) return;
+
+        const options = {
+            method: 'GET',
+            url: 'https://trueway-directions2.p.rapidapi.com/FindDrivingRoute',
+            params: {
+            //   stops: '40.629041,-74.025606;40.630099,-73.993521;40.644895,-74.013818;40.627177,-73.980853'
+              stops: `${originLat}, ${originLng};${destinationLat},${destinationLng};`
+            },
+            headers: {
+              'X-RapidAPI-Key': '303c62c77fmsh8641af55211efc3p1df84cjsn3585047e62e2',
+              'X-RapidAPI-Host': 'trueway-directions2.p.rapidapi.com'
+            }
+          };
+
+        const getDirections = async()=> {
+
+            try {
+                const response = await axios.request(options);
+                // console.log(response.data.route.geometry.coordinates);
+                const data = response.data.route.geometry.coordinates;
+
+                const coordinates = data.map(point => ({
+                    latitude: point[0],
+                    longitude: point[1],
+                  }));
+                  setRouteCoordinates(coordinates);
+
+                  console.log(routeCoordinates);
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        getDirections();
+         
+    },[origin, destination]);
+
   return (
     <MapView
         ref={mapRef}
         style={tw`flex-1`}
-        mapType='standard'
+        mapType='mutedStandard'
         initialRegion={{
             latitude: origin.location.lat,
             longitude: origin.location.lng,
@@ -94,6 +138,7 @@ const Map = () => {
                 latitude: origin.location.lat,
                 longitude: origin.location.lng,
             }}
+            image={require("../11.png")}
             title="Origin"
             description={origin.description}
             identifier='origin'
@@ -106,20 +151,15 @@ const Map = () => {
                 latitude: destination.location.lat,
                 longitude: destination.location.lng,
             }}
+            image={require("../7.png")}
             title="Destination"
             description={destination.description}
             identifier='Destination'
         />
         )}    
 
-        {origin && destination && (
-            <MapViewDirections
-                origin={origin.location}
-                destination={destination.location}
-                apikey={GOOGLE_MAPS_APIKEY}
-                strokeWidth={3}
-                strokeColor='black'
-            />
+        {routeCoordinates.length > 0 && origin && destination && (
+            <Polyline coordinates={routeCoordinates} strokeWidth={3} strokeColor="black" />
         )}
         
     </MapView>
